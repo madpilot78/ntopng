@@ -3509,7 +3509,7 @@ struct flowHostRetriever {
   u_int8_t locationFilter;
 
   /* Return values */
-  u_int32_t maxNumEntries, actNumEntries;
+  u_int32_t maxNumEntries, actNumEntrie, toSkip;
   struct flowHostRetrieveList *elems;
 
   /* Paginator */
@@ -3756,6 +3756,127 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data, bool *matc
      (r->hideTopHidden && h->isHiddenFromTop())       ||
      (r->traffic_type == traffic_type_one_way && !h->isOneWayTraffic())       ||
      (r->traffic_type == traffic_type_bidirectional && h->isOneWayTraffic())  ||
+#ifdef NTOPNG_PRO
+     (r->filteredHosts && !h->hasBlockedTraffic()) ||
+#endif
+     (r->ipVersionFilter && (((r->ipVersionFilter == 4) && (!h->get_ip()->isIPv4()))
+			     || ((r->ipVersionFilter == 6) && (!h->get_ip()->isIPv6())))))
+    return(false); /* false = keep on walking */
+
+  r->elems[r->actNumEntries].hostValue = h;
+
+  switch(r->sorter) {
+  case column_ip:
+    r->elems[r->actNumEntries++].hostValue = h; /* hostValue was already set */
+    break;
+
+  case column_alerts:
+    r->elems[r->actNumEntries++].numericValue = h->getNumAlerts();
+    break;
+
+  case column_name:
+    r->elems[r->actNumEntries++].stringValue = strdup(h->get_name(buf, sizeof(buf), false));
+    break;
+
+  case column_country:
+    r->elems[r->actNumEntries++].stringValue = strdup(h->get_country(buf, sizeof(buf)));
+    break;
+
+  case column_os:
+    r->elems[r->actNumEntries++].stringValue = strdup(h->get_os() ? h->get_os() : (char*)"");
+    break;
+
+  case column_vlan:
+    r->elems[r->actNumEntries++].numericValue = h->get_vlan_id();
+    break;
+
+  case column_since:
+    r->elems[r->actNumEntries++].numericValue = h->get_first_seen();
+    break;
+
+  case column_asn:
+    r->elems[r->actNumEntries++].numericValue = h->get_asn();
+    break;
+
+  case column_thpt:
+    r->elems[r->actNumEntries++].numericValue = h->getBytesThpt();
+    break;
+
+  case column_num_flows:
+    r->elems[r->actNumEntries++].numericValue = h->getNumActiveFlows();
+    break;
+
+  case column_num_dropped_flows:
+    r->elems[r->actNumEntries++].numericValue = h->getNumDroppedFlows();
+    break;
+
+  case column_traffic:
+    r->elems[r->actNumEntries++].numericValue = h->getNumBytes();
+    break;
+
+  case column_local_network_id:
+    r->elems[r->actNumEntries++].numericValue = h->get_local_network_id();
+    break;
+
+  case column_local_network:
+    ntop->getLocalNetworkIp(h->get_local_network_id(), &ip_addr, &network_prefix);
+    r->elems[r->actNumEntries].ipValue = ip_addr;
+    r->elems[r->actNumEntries++].numericValue = network_prefix;
+    break;
+
+  case column_mac:
+    r->elems[r->actNumEntries++].numericValue = Utils::macaddr_int(h->get_mac());
+    break;
+
+  case column_pool_id:
+    r->elems[r->actNumEntries++].numericValue = h->get_host_pool();
+    break;
+
+    /* Criteria */
+  case column_uploaders:      r->elems[r->actNumEntries++].numericValue = h->getNumBytesSent(); break;
+  case column_downloaders:    r->elems[r->actNumEntries++].numericValue = h->getNumBytesRcvd(); break;
+  case column_unknowers:      r->elems[r->actNumEntries++].numericValue = h->get_ndpi_stats()->getProtoBytes(NDPI_PROTOCOL_UNKNOWN); break;
+  case column_incomingflows:  r->elems[r->actNumEntries++].numericValue = h->getNumIncomingFlows(); break;
+  case column_outgoingflows:  r->elems[r->actNumEntries++].numericValue = h->getNumOutgoingFlows(); break;
+
+  default:
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Internal error: column %d not handled", r->sorter);
+    break;
+  }
+
+  *matched = true;
+  return(false); /* false = keep on walking */
+}
+
+/*
+ * WIP
+ * Extensive work will happen here
+ */
+static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *matched) {
+  char buf[64];
+  u_int8_t network_prefix = 0;
+  IpAddress *ip_addr = NULL;
+  struct flowHostRetriever *r = (struct flowHostRetriever*)user_data;
+  Host *h = (Host*)he;
+
+  if(r->actNumEntries >= r->maxNumEntries)
+    return(true); /* Limit reached */
+
+  if(!h || h->idle() || !h->match(r->allowed_hosts))
+    return(false);
+
+  if((r->location == location_local_only      && !h->isLocalHost())                       ||
+     (r->location == location_remote_only     && h->isLocalHost())                        ||
+     ((r->vlan_id != ((u_int16_t)-1)) && (r->vlan_id != h->get_vlan_id()))                ||
+     ((r->ndpi_proto != -1) && (h->get_ndpi_stats()->getProtoBytes(r->ndpi_proto) == 0))  ||
+     ((r->asnFilter != (u_int32_t)-1)     && (r->asnFilter       != h->get_asn()))        ||
+     ((r->networkFilter != -2) && (r->networkFilter != h->get_local_network_id()))        ||
+     (r->mac           && (!h->getMac()->equal(r->mac)))    ||
+     ((r->poolFilter != (u_int16_t)-1)    && (r->poolFilter    != h->get_host_pool()))    ||
+     (r->country  && strlen(r->country)  && strcmp(h->get_country(buf, sizeof(buf)), r->country)) ||
+     (r->osFilter && strlen(r->osFilter) && (!h->get_os()      || strcmp(h->get_os(), r->osFilter)))     ||
+     (r->blacklistedHosts && !h->isBlacklisted())     ||
+     (r->hideTopHidden && h->isHiddenFromTop())     ||
 #ifdef NTOPNG_PRO
      (r->filteredHosts && !h->hasBlockedTraffic()) ||
 #endif
@@ -4373,6 +4494,93 @@ int NetworkInterface::dropFlowsTraffic(AddressTree *allowed_hosts, Paginator *p)
 
 /* **************************************************** */
 
+int NetworkInterface::sortPageHosts(u_int32_t *begin_slot,
+				bool walk_all,
+				struct flowHostRetriever *retriever,
+				u_int8_t bridge_iface_idx,
+				AddressTree *allowed_hosts,
+				bool host_details,
+				LocationPolicy location,
+				char *countryFilter, char *mac_filter,
+				u_int16_t vlan_id, char *osFilter,
+				u_int32_t asnFilter, int16_t networkFilter,
+				u_int16_t pool_filter, bool filtered_hosts,
+				bool blacklisted_hosts, bool hide_top_hidden,
+				u_int8_t ipver_filter, int proto_filter,
+				char *sortColumn, u_int32_t maxHits,
+				u_int32_t toSkip) {
+  u_int8_t macAddr[6];
+  int (*sorter)(const void *_a, const void *_b);
+
+  if(retriever == NULL ||
+    maxHits > getHostsHashSize() ||
+    maxHits == 0)
+    return -1;
+
+  memset(retriever, 0, sizeof(struct flowHostRetriever));
+
+  if(mac_filter) {
+    Utils::parseMac(macAddr, mac_filter);
+    retriever->mac = macAddr;
+  } else {
+    retriever->mac = NULL;
+  }
+
+  retriever->allowed_hosts = allowed_hosts, retriever->location = location,
+    retriever->country = countryFilter, retriever->vlan_id = vlan_id,
+    retriever->osFilter = osFilter, retriever->asnFilter = asnFilter,
+    retriever->networkFilter = networkFilter, retriever->actNumEntries = 0,
+    retriever->poolFilter = pool_filter, retriever->bridge_iface_idx = 0;
+  retriever->ipVersionFilter = ipver_filter;
+  retriever->filteredHosts = filtered_hosts;
+  retriever->blacklistedHosts = blacklisted_hosts;
+  retriever->hideTopHidden = hide_top_hidden;
+  retriever->ndpi_proto = proto_filter;
+  retriever->maxNumEntries = maxHits;
+  retriever->toSkip = toSkip;
+  retriever->elems = (struct flowHostRetrieveList*)calloc(sizeof(struct flowHostRetrieveList), retriever->maxNumEntries);
+
+  if(retriever->elems == NULL) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Out of memory :-(");
+    return(-1);
+  }
+
+  if((!strcmp(sortColumn, "column_ip")) || (!strcmp(sortColumn, "column_"))) retriever->sorter = column_ip, sorter = hostSorter;
+  else if(!strcmp(sortColumn, "column_vlan")) retriever->sorter = column_vlan, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_alerts")) retriever->sorter = column_alerts, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_name")) retriever->sorter = column_name, sorter = stringSorter;
+  else if(!strcmp(sortColumn, "column_country")) retriever->sorter = column_country, sorter = stringSorter;
+  else if(!strcmp(sortColumn, "column_os")) retriever->sorter = column_os, sorter = stringSorter;
+  else if(!strcmp(sortColumn, "column_since")) retriever->sorter = column_since, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_asn")) retriever->sorter = column_asn, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_thpt")) retriever->sorter = column_thpt, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_num_flows")) retriever->sorter = column_num_flows, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_num_dropped_flows")) retriever->sorter = column_num_dropped_flows, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_traffic")) retriever->sorter = column_traffic, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_local_network_id")) retriever->sorter = column_local_network_id, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_local_network")) retriever->sorter = column_local_network, sorter = ipNetworkSorter;
+  else if(!strcmp(sortColumn, "column_mac")) retriever->sorter = column_mac, sorter = numericSorter;
+  /* criteria (datatype sortField in ntop_typedefs.h / see also host_search_walker:NetworkInterface.cpp) */
+  else if(!strcmp(sortColumn, "column_uploaders")) retriever->sorter = column_uploaders, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_downloaders")) retriever->sorter = column_downloaders, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_unknowers")) retriever->sorter = column_unknowers, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_incomingflows")) retriever->sorter = column_incomingflows, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_outgoingflows")) retriever->sorter = column_outgoingflows, sorter = numericSorter;
+  else if(!strcmp(sortColumn, "column_pool_id")) retriever->sorter = column_pool_id, sorter = numericSorter;
+  else {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Unknown sort column %s", sortColumn);
+    retriever->sorter = column_traffic, sorter = numericSorter;
+  }
+
+  // make sure the caller has disabled the purge!!
+  walker(begin_slot, walk_all, walker_hosts, host_pagesearch_walker, (void*)retriever);
+
+// XXX Check if actually unneeded here.
+//  qsort(retriever->elems, retriever->actNumEntries, sizeof(struct flowHostRetrieveList), sorter);
+
+  return(retriever->actNumEntries);
+}
+
 int NetworkInterface::sortHosts(u_int32_t *begin_slot,
 				bool walk_all,
 				struct flowHostRetriever *retriever,
@@ -4665,14 +4873,14 @@ int NetworkInterface::getActiveHostsList(lua_State* vm,
 				 __FUNCTION__, *begin_slot, walk_all);
 #endif
 
-  if(sortHosts(begin_slot, walk_all,
+  if(sortPageHosts(begin_slot, walk_all,
 	       &retriever, bridge_iface_idx,
 	       allowed_hosts, host_details, location,
 	       countryFilter, mac_filter, vlan_id, osFilter,
 	       asnFilter, networkFilter, pool_filter, filtered_hosts, blacklisted_hosts, hide_top_hidden, anomalousOnly,
 	       ipver_filter, proto_filter,
 	       traffic_type_filter,
-	       sortColumn) < 0) {
+	       sortColumn, maxHists, toSkip) < 0) {
     enablePurge(false);
     return -1;
   }
