@@ -3858,9 +3858,6 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
   Host *h = (Host*)he;
   u_int32_t first_pos = 0;
 
-//  if(r->actNumEntries >= r->maxNumEntries)
-//    return(true); /* Limit reached */
-
   if(!h || h->idle() || !h->match(r->allowed_hosts))
     return(false);
 
