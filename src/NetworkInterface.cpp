@@ -3968,8 +3968,6 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
   } else if(r->actNumEntries == r->maxNumEntries) {
     memcpy(r->elems[r->actNumEntries], &t, sizeof(struct flowHostRetrieveList);
     r->actNumEntries++;
-    // result array filled, sort it, since we need sorted data to make sense of further elements
-    qsort(r->elems, r->actNumEntries, sizeof(struct flowHostRetrieveList), r->sort_func);
   } else /* if(r->actNumEntries > r->maxNumEntries) */ {
     /* Ignore elents outside of the range we aalready have */
     if(r->sort_func(r->elems[0], &t) > 0) {
@@ -3981,16 +3979,15 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
       if(first_pos < r->toSkip) {
 	// we still have to skip elements, replace head of array
 	memcpy(r->elems[0], &t, sizeof(struct flowHostRetrieveList);
-	// Sort it, since first elemnt coud be out of order
-	qsort(r->elems, r->actNumEntries, sizeof(struct flowHostRetrieveList), r->sort_func);
       } else {
 	// We skipped enough elements, from now on, dreplace tail of the array
 	memcpy(r->elems[r->actNumEntries], &t, sizeof(struct flowHostRetrieveList);
-	// Sort, ssince last element could be out of order
-	qsort(r->elems, r->actNumEntries, sizeof(struct flowHostRetrieveList), r->sort_func);
       }
     }
   }
+
+  // Ensure the array is sorted
+  qsort(r->elems, r->actNumEntries, sizeof(struct flowHostRetrieveList), r->sort_func);
 
   *matched = true;
   return(false); /* false = keep on walking */
