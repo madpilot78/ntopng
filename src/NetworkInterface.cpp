@@ -4900,7 +4900,7 @@ int NetworkInterface::getActiveHostsList(lua_State* vm,
 	       asnFilter, networkFilter, pool_filter, filtered_hosts, blacklisted_hosts, hide_top_hidden, anomalousOnly,
 	       ipver_filter, proto_filter,
 	       traffic_type_filter,
-	       sortColumn, maxHists, toSkip) < 0) {
+	       sortColumn, maxHits, toSkip) < 0) {
     enablePurge(false);
     return -1;
   }
