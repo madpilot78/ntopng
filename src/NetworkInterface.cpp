@@ -3510,7 +3510,7 @@ struct flowHostRetriever {
   u_int8_t locationFilter;
 
   /* Return values */
-  u_int32_t maxNumEntries, actNumEntrie, toSkip;
+  u_int32_t maxNumEntries, actNumEntries, toSkip;
   struct flowHostRetrieveList *elems;
 
   /* Paginator */
