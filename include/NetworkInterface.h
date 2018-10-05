@@ -220,7 +220,7 @@ class NetworkInterface : public Checkpointable {
     bool blacklisted_hosts, bool hide_top_hidden,
     u_int8_t ipver_filter, int proto_filter,
 		char *sortColumn, u_int32_t maxHits,
-		u_int32_t toSkip));
+		u_int32_t toSkip);
   int sortASes(struct flowHostRetriever *retriever,
 	       char *sortColumn);
   int sortCountries(struct flowHostRetriever *retriever,
