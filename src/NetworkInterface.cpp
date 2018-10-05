@@ -3964,10 +3964,7 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
     // we have stiil space in the result array, save eveything.
     memcpy(&(r->elems[r->actNumEntries]), &t, sizeof(struct flowHostRetrieveList));
     r->actNumEntries++;
-  } else if(r->actNumEntries == r->maxNumEntries) {
-    memcpy(&(r->elems[r->actNumEntries]), &t, sizeof(struct flowHostRetrieveList));
-    r->actNumEntries++;
-  } else /* if(r->actNumEntries > r->maxNumEntries) */ {
+  } else {
     /* Ignore elents outside of the range we aalready have */
     if(r->sort_func(&(r->elems[0]), &t) > 0) {
       r->firstPos++; // increment position of first element in the full set
