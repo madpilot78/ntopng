@@ -3963,10 +3963,10 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
 
   if(r->actNumEntries < r->maxNumEntries) {
     // we have stiil space in the result array, save eveything.
-    memcpy(r->elems[r->actNumEntries], &t, sizeof(struct flowHostRetrieveList);
+    memcpy(r->elems[r->actNumEntries], &t, sizeof(struct flowHostRetrieveList));
     r->actNumEntries++;
   } else if(r->actNumEntries == r->maxNumEntries) {
-    memcpy(r->elems[r->actNumEntries], &t, sizeof(struct flowHostRetrieveList);
+    memcpy(r->elems[r->actNumEntries], &t, sizeof(struct flowHostRetrieveList));
     r->actNumEntries++;
   } else /* if(r->actNumEntries > r->maxNumEntries) */ {
     /* Ignore elents outside of the range we aalready have */
@@ -3978,10 +3978,10 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
     } else {
       if(first_pos < r->toSkip) {
 	// we still have to skip elements, replace head of array
-	memcpy(r->elems[0], &t, sizeof(struct flowHostRetrieveList);
+	memcpy(r->elems[0], &t, sizeof(struct flowHostRetrieveList));
       } else {
 	// We skipped enough elements, from now on, dreplace tail of the array
-	memcpy(r->elems[r->actNumEntries], &t, sizeof(struct flowHostRetrieveList);
+	memcpy(r->elems[r->actNumEntries], &t, sizeof(struct flowHostRetrieveList)_;
       }
     }
   }
