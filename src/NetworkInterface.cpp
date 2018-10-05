@@ -3970,10 +3970,10 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
     r->actNumEntries++;
   } else /* if(r->actNumEntries > r->maxNumEntries) */ {
     /* Ignore elents outside of the range we aalready have */
-    if(r->sort_func(r->elems[0], &t) > 0) {
+    if(r->sort_func(&(r->elems[0]), &t) > 0) {
       first_pos++; // increment position of first element in the full set
       return(false); /* false = keep on walking */
-    } else if(r->sort_func(r->elems[actNumEntries], &t) < 0) {
+    } else if(r->sort_func(&(r->elems[actNumEntries]), &t) < 0) {
       return(false); /* false = keep on walking */
     } else {
       if(first_pos < r->toSkip) {
