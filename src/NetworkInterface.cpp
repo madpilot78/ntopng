@@ -3510,7 +3510,7 @@ struct flowHostRetriever {
   u_int8_t locationFilter;
 
   /* Return values */
-  u_int32_t maxNumEntries, actNumEntries, toSkip;
+  u_int32_t maxNumEntries, actNumEntries, toSkip, firstPos;
   struct flowHostRetrieveList *elems;
 
   /* Paginator */
@@ -3856,7 +3856,6 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
   struct flowHostRetriever *r = (struct flowHostRetriever*)user_data;
   struct flowHostRetrieveList t;
   Host *h = (Host*)he;
-  u_int32_t first_pos = 0;
 
   if(!h || h->idle() || !h->match(r->allowed_hosts))
     return(false);
@@ -3971,12 +3970,12 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
   } else /* if(r->actNumEntries > r->maxNumEntries) */ {
     /* Ignore elents outside of the range we aalready have */
     if(r->sort_func(&(r->elems[0]), &t) > 0) {
-      first_pos++; // increment position of first element in the full set
+      r->firstPos++; // increment position of first element in the full set
       return(false); /* false = keep on walking */
     } else if(r->sort_func(&(r->elems[r->actNumEntries]), &t) < 0) {
       return(false); /* false = keep on walking */
     } else {
-      if(first_pos < r->toSkip) {
+      if(r->firstPos < r->toSkip) {
 	// we still have to skip elements, replace head of array
 	memcpy(&(r->elems[0]), &t, sizeof(struct flowHostRetrieveList));
       } else {
@@ -4561,6 +4560,7 @@ int NetworkInterface::sortPageHosts(u_int32_t *begin_slot,
   retriever->ndpi_proto = proto_filter;
   retriever->maxNumEntries = maxHits;
   retriever->toSkip = toSkip;
+  retriever->firstPos = 0;
   retriever->elems = (struct flowHostRetrieveList*)calloc(sizeof(struct flowHostRetrieveList), retriever->maxNumEntries);
 
   if(retriever->elems == NULL) {
