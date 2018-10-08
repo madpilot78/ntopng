@@ -3970,6 +3970,7 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
       r->firstPos++; // increment position of first element in the full set
       return(false); /* false = keep on walking */
     } else if(r->sort_func(&(r->elems[r->actNumEntries]), &t) < 0) {
+      // skip element beyond end of our array.
       return(false); /* false = keep on walking */
     } else {
       if(r->firstPos < r->toSkip) {
