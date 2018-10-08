@@ -3969,7 +3969,7 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
     if(r->sort_func(&(r->elems[0]), &t) > 0) {
       r->firstPos++; // increment position of first element in the full set
       return(false); /* false = keep on walking */
-    } else if(r->sort_func(&(r->elems[r->actNumEntries]), &t) < 0) {
+    } else if(r->sort_func(&(r->elems[r->actNumEntries - 1]), &t) < 0) {
       // skip element beyond end of our array.
       return(false); /* false = keep on walking */
     } else {
@@ -3979,7 +3979,7 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
 	r->firstPos++;
       } else {
 	// We skipped enough elements, from now on, dreplace tail of the array
-	memcpy(&(r->elems[r->actNumEntries]), &t, sizeof(struct flowHostRetrieveList)_;
+	memcpy(&(r->elems[r->actNumEntries - 1]), &t, sizeof(struct flowHostRetrieveList)_;
       }
     }
   }
