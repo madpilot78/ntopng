@@ -3976,6 +3976,7 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
       if(r->firstPos < r->toSkip) {
 	// we still have to skip elements, replace head of array
 	memcpy(&(r->elems[0]), &t, sizeof(struct flowHostRetrieveList));
+	r->firstPos++;
       } else {
 	// We skipped enough elements, from now on, dreplace tail of the array
 	memcpy(&(r->elems[r->actNumEntries]), &t, sizeof(struct flowHostRetrieveList)_;
