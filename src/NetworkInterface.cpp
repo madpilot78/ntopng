@@ -3965,7 +3965,7 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
     memcpy(&(r->elems[r->actNumEntries]), &t, sizeof(struct flowHostRetrieveList));
     r->actNumEntries++;
   } else {
-    /* Ignore elents outside of the range we aalready have */
+    /* Ignore elents outside of the range we already have */
     if(r->sort_func(&(r->elems[0]), &t) > 0) {
       r->firstPos++; // increment position of first element in the full set
       return(false); /* false = keep on walking */
