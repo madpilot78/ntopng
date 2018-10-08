@@ -3979,7 +3979,7 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
 	r->firstPos++;
       } else {
 	// We skipped enough elements, from now on, dreplace tail of the array
-	memcpy(&(r->elems[r->actNumEntries - 1]), &t, sizeof(struct flowHostRetrieveList)_;
+	memcpy(&(r->elems[r->actNumEntries - 1]), &t, sizeof(struct flowHostRetrieveList));
       }
     }
   }
