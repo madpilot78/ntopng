@@ -4535,8 +4535,7 @@ int NetworkInterface::sortPageHosts(u_int32_t *begin_slot,
 				u_int32_t toSkip) {
   u_int8_t macAddr[6];
 
-  if(retriever == NULL ||
-    maxHits == 0)
+  if(retriever == NULL || maxHits == 0)
     return -1;
 
   memset(retriever, 0, sizeof(struct flowHostRetriever));
