@@ -3510,7 +3510,7 @@ struct flowHostRetriever {
   u_int8_t locationFilter;
 
   /* Return values */
-  u_int32_t maxNumEntries, actNumEntries, toSkip, firstPos;
+  u_int32_t maxNumEntries, actNumEntries, totNumEntries, toSkip, firstPos;
   struct flowHostRetrieveList *elems;
 
   /* Paginator */
@@ -3959,6 +3959,8 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Internal error: column %d not handled", r->sorter);
     break;
   }
+
+  r->totNumEntries++;
 
   if(r->actNumEntries < r->maxNumEntries) {
     // we have stiil space in the result array, save eveything.
@@ -4534,7 +4536,6 @@ int NetworkInterface::sortPageHosts(u_int32_t *begin_slot,
   u_int8_t macAddr[6];
 
   if(retriever == NULL ||
-    maxHits > getHostsHashSize() ||
     maxHits == 0)
     return -1;
 
@@ -4550,7 +4551,7 @@ int NetworkInterface::sortPageHosts(u_int32_t *begin_slot,
   retriever->allowed_hosts = allowed_hosts, retriever->location = location,
     retriever->country = countryFilter, retriever->vlan_id = vlan_id,
     retriever->osFilter = osFilter, retriever->asnFilter = asnFilter,
-    retriever->networkFilter = networkFilter, retriever->actNumEntries = 0,
+    retriever->networkFilter = networkFilter, retriever->actNumEntries = 0, retriever->totNumEntries = 0,
     retriever->poolFilter = pool_filter, retriever->bridge_iface_idx = 0;
   retriever->ipVersionFilter = ipver_filter;
   retriever->filteredHosts = filtered_hosts;
@@ -4907,17 +4908,22 @@ int NetworkInterface::getActiveHostsList(lua_State* vm,
 #if DEBUG
   if(!walk_all)
     ntop->getTrace()->traceEvent(TRACE_NORMAL, "[END] %s(end_slot=%u, numHosts=%u)",
-				 __FUNCTION__, *begin_slot, retriever.actNumEntries);
+				 __FUNCTION__, *begin_slot, retriever.totNumEntries);
 #endif
 
   lua_newtable(vm);
-  lua_push_uint64_table_entry(vm, "numHosts", retriever.actNumEntries);
+  lua_push_uint64_table_entry(vm, "numHosts", retriever.totNumEntries);
   lua_push_uint64_table_entry(vm, "nextSlot", *begin_slot);
 
   lua_newtable(vm);
 
+  // Make sure last page contains only the remaining objects
+  if(retriever.totNumEntries < toSkip + maxHits)
+    maxHits = retriever.totNumEntries - toSkip;
+
   if(a2zSortOrder) {
-    for(int i = toSkip, num=0; i<(int)retriever.actNumEntries && num < (int)maxHits; i++, num++) {
+    // If not last page retriever.actNumEntries-maxHits == 0
+    for(int i = retriever.actNumEntries-maxHits, num=0; i<(int)retriever.actNumEntries && num < (int)maxHits; i++, num++) {
       Host *h = retriever.elems[i].hostValue;
 
       if(!tsLua)
@@ -4926,7 +4932,7 @@ int NetworkInterface::getActiveHostsList(lua_State* vm,
 	h->tsLua(vm);
     }
   } else {
-    for(int i = (retriever.actNumEntries-1-toSkip), num=0; i >= 0 && num < (int)maxHits; i--, num++) {
+    for(int i = retriever.actNumEntries-1, num=0; i >= 0 && num < (int)maxHits; i--, num++) {
       Host *h = retriever.elems[i].hostValue;
 
       if(!tsLua)
