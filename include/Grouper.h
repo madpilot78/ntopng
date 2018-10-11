@@ -40,26 +40,29 @@ struct groupStats{
   char country[3];
 };
 
-class Grouper {
- private:
-  sortField sorter;
-
-  int table_index;
+struct group {
   int64_t group_id_i;
   bool group_id_set;
   char *group_id_s;
   char *group_label;
   groupStats stats;
+};
+
+class Grouper {
+ private:
+  sortField sorter;
+
+  group *groups[];
+  int32_t numGroups;
+
+  int8_t newGroup(Host *h);
+  bool inGroup(Host *h);
 
  public:
   Grouper(sortField sf);
   ~Grouper();
 
-  inline u_int32_t getNumEntries(){return stats.num_hosts;}
-
-  bool inGroup(Host *h);
   int8_t incStats(Host *h);
-  int8_t newGroup(Host *h);
 
   void lua(lua_State* vm);
 };
