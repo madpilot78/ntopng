@@ -3512,6 +3512,7 @@ struct flowHostRetriever {
   /* Return values */
   u_int32_t maxNumEntries, actNumEntries, totNumEntries, toSkip, firstPos;
   struct flowHostRetrieveList *elems;
+  Grouper *gper;
 
   /* Paginator */
   Paginator *pag;
@@ -3847,6 +3848,40 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data, bool *matc
 
   *matched = true;
   return(false); /* false = keep on walking */
+}
+
+static bool host_grouper_walker(GenericHashEntry *he, void *user_data, bool *matched) {
+  char buf[64];
+  u_int8_t network_prefix = 0;
+  IpAddress *ip_addr = NULL;
+  struct flowHostRetriever *r = (struct flowHostRetriever*)user_data;
+  Host *h = (Host*)he;
+
+  if(!h || h->idle() || !h->match(r->allowed_hosts))
+    return(false);
+
+    if((r->location == location_local_only      && !h->isLocalHost())                       ||
+     (r->location == location_remote_only     && h->isLocalHost())                        ||
+     ((r->vlan_id != ((u_int16_t)-1)) && (r->vlan_id != h->get_vlan_id()))                ||
+     ((r->ndpi_proto != -1) && (h->get_ndpi_stats()->getProtoBytes(r->ndpi_proto) == 0))  ||
+     ((r->asnFilter != (u_int32_t)-1)     && (r->asnFilter       != h->get_asn()))        ||
+     ((r->networkFilter != -2) && (r->networkFilter != h->get_local_network_id()))        ||
+     (r->mac           && (!h->getMac()->equal(r->mac)))    ||
+     ((r->poolFilter != (u_int16_t)-1)    && (r->poolFilter    != h->get_host_pool()))    ||
+     (r->country  && strlen(r->country)  && strcmp(h->get_country(buf, sizeof(buf)), r->country)) ||
+     (r->osFilter && strlen(r->osFilter) && (!h->get_os()      || strcmp(h->get_os(), r->osFilter)))     ||
+     (r->blacklistedHosts && !h->isBlacklisted())     ||
+     (r->hideTopHidden && h->isHiddenFromTop())     ||
+#ifdef NTOPNG_PRO
+     (r->filteredHosts && !h->hasBlockedTraffic()) ||
+#endif
+     (r->ipVersionFilter && (((r->ipVersionFilter == 4) && (!h->get_ip()->isIPv4()))
+			     || ((r->ipVersionFilter == 6) && (!h->get_ip()->isIPv6())))))
+    return(false); /* false = keep on walking */
+
+    r->gper->incStats(h);
+
+    r->totNumEntries++;
 }
 
 static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *matched) {
