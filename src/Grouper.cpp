@@ -122,7 +122,7 @@ int32_t Grouper::newGroup(Host *h) {
   newg = (group **)realloc(groups, sizeof(struct group) * (numGroups + 1));
   if(newg == NULL) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
-    return -1
+    return -1;
   }
   groups = newg;
 
