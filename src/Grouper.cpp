@@ -47,7 +47,7 @@ Grouper::~Grouper(){
 /**
  * Returns group index. Calls newGroup() if no matching group is found.
  *
- * Returns -1 for unknown sorting criteria, meaning the host should be ignored.
+ * Returns -1 for unsupported sorting criteria, causes host to be skipped.
  */
 int32_t Grouper::inGroup(Host *h) {
   if(h == NULL)
@@ -107,7 +107,7 @@ int32_t Grouper::inGroup(Host *h) {
 /**
  * Creates a new group.
  *
- * returns group ID, -1 in case of errors.
+ * returns group ID, -1 in case of errors or unsupported sorting criteria.
  */
 int32_t Grouper::newGroup(Host *h) {
   char buf[32];
