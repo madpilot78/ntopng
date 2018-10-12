@@ -55,7 +55,7 @@ class Grouper {
   group **groups;
   int32_t numGroups;
 
-  int8_t newGroup(Host *h);
+  int32_t newGroup(Host *h);
   int32_t inGroup(Host *h);
 
  public:
