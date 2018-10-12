@@ -228,8 +228,8 @@ int8_t Grouper::incStats(Host *h) {
  * qsort callbacks for group_id_i
  */
 int id_i_sorter(const void *_a, const void *_b) {
-  Host *a = *(Host **)_a;
-  Host *b = *(Host **)_b;
+  group *a = *(group **)_a;
+  group *b = *(group **)_b;
 
   if(a->group_id_i < b->group_id_i)
     return -1;
@@ -245,8 +245,8 @@ int id_i_sorter(const void *_a, const void *_b) {
  * qsort callback for group_id_s
  */
 int id_s_sorter(const void *_a, const void *_b) {
-  Host *a = *(Host **)_a;
-  Host *b = *(Host **)_b;
+  group *a = *(group **)_a;
+  group *b = *(group **)_b;
 
   return strcmp(a->group_id_s, b->group_id_s);
 }
