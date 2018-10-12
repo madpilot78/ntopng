@@ -4652,7 +4652,6 @@ int NetworkInterface::groupHosts(u_int32_t *begin_slot,
 				bool blacklisted_hosts, bool hide_top_hidden,
 				u_int8_t ipver_filter, int proto_filter,
 				char *sortColumn, Grouper *gper) {
-
   if(retriever == NULL || maxHits == 0)
     return -1;
 
