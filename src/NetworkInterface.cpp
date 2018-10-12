@@ -3852,8 +3852,6 @@ static bool host_search_walker(GenericHashEntry *he, void *user_data, bool *matc
 
 static bool host_grouper_walker(GenericHashEntry *he, void *user_data, bool *matched) {
   char buf[64];
-  u_int8_t network_prefix = 0;
-  IpAddress *ip_addr = NULL;
   struct flowHostRetriever *r = (struct flowHostRetriever*)user_data;
   Host *h = (Host*)he;
 
