@@ -237,8 +237,8 @@ int id_i_sorter(const void *_a, const void *_b) {
   if(a->group_id_i == b->group_id_i)
     return 0;
 
-  if(a->group_id_i > b->group_id_i)
-    return 1;
+//  if(a->group_id_i > b->group_id_i)
+  return 1;
 }
 
 /*
