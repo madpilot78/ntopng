@@ -63,7 +63,6 @@ class Grouper {
   ~Grouper();
 
   int8_t incStats(Host *h);
-  inline u_int32_t getNumEntries() { return(numGroups); }
 
   void lua(lua_State* vm);
 };
