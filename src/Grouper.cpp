@@ -245,8 +245,8 @@ int id_i_sorter(const void *_a, const void *_b) {
  * qsort callback for group_id_s
  */
 int id_s_sorter(const void *_a, const void *_b) {
-  Host *a = *(Host *)_a;
-  Host *b = *(Host *)_b;
+  Host *a = *(Host **)_a;
+  Host *b = *(Host **)_b;
 
   return strcmp(a->group_id_s, b->group_id_s);
 }
