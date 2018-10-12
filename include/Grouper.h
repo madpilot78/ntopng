@@ -56,7 +56,7 @@ class Grouper {
   int32_t numGroups;
 
   int8_t newGroup(Host *h);
-  bool inGroup(Host *h);
+  int32_t inGroup(Host *h);
 
  public:
   Grouper(sortField sf);
