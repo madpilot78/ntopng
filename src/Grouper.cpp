@@ -225,10 +225,55 @@ int8_t Grouper::incStats(Host *h) {
 /* *************************************** */
 
 /*
+ * qsort callbacks for group_id_i
+ */
+int id_i_sorter(const void *_a, const void *_b) {
+  Host *a = (Host *)_a;
+  Host *b = (Host *)_b;
+
+  if(a->group_id_i < b->group_id_i)
+    return -1;
+
+  if(a->group_id_i == b->group_id_i)
+    return 0;
+
+  if(a->group_id_i > b->group_id_i)
+    return 1;
+}
+
+/*
+ * qsort callback for group_id_s
+ */
+int id_s_sorter(const void *_a, const void *_b) {
+  Host *a = (Host *)_a;
+  Host *b = (Host *)_b;
+
+  return strcmp(a->group_id_s, b->group_id_s);
+}
+
+/*
  * Sort the group[] array and recursively add them to LUA tables.
  */
 void Grouper::lua(lua_State* vm) {
-  /* XXX sort group[] here */
+  switch(sorter) {
+    case column_asn:
+    case column_vlan:
+    case column_local_network:
+    case column_local_network_id:
+    case column_pool_id:
+    case column_mac:
+      qsort(&groups, numGroups, sizeof(Host *), id_i_sorter));
+      break;
+
+    case column_country:
+    case column_os:
+      qsort(&groups, numGroups, sizeof(Host *), id_s_sorter));
+      break;
+
+    default:
+      // Skip sorting for unsupported criteria
+      break;
+  }
 
   for(int32_t i = 0; i < numGroups; i++) {
     lua_newtable(vm);
