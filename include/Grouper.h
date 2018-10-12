@@ -52,7 +52,7 @@ class Grouper {
  private:
   sortField sorter;
 
-  group *groups[];
+  group **groups;
   int32_t numGroups;
 
   int8_t newGroup(Host *h);
