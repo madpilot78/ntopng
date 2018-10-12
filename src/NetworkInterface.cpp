@@ -4635,6 +4635,78 @@ int NetworkInterface::sortPageHosts(u_int32_t *begin_slot,
   return(retriever->actNumEntries);
 }
 
+int NetworkInterface::groupHosts(u_int32_t *begin_slot,
+				bool walk_all,
+				struct flowHostRetriever *retriever,
+				u_int8_t bridge_iface_idx,
+				AddressTree *allowed_hosts,
+				bool host_details,
+				LocationPolicy location,
+				char *countryFilter, char *mac_filter,
+				u_int16_t vlan_id, char *osFilter,
+				u_int32_t asnFilter, int16_t networkFilter,
+				u_int16_t pool_filter, bool filtered_hosts,
+				bool blacklisted_hosts, bool hide_top_hidden,
+				u_int8_t ipver_filter, int proto_filter,
+				char *sortColumn, Grouper *gper) {
+
+  if(retriever == NULL || maxHits == 0)
+    return -1;
+
+  memset(retriever, 0, sizeof(struct flowHostRetriever));
+
+  if(mac_filter) {
+    Utils::parseMac(macAddr, mac_filter);
+    retriever->mac = macAddr;
+  } else {
+    retriever->mac = NULL;
+  }
+
+  retriever->allowed_hosts = allowed_hosts, retriever->location = location,
+    retriever->country = countryFilter, retriever->vlan_id = vlan_id,
+    retriever->osFilter = osFilter, retriever->asnFilter = asnFilter,
+    retriever->networkFilter = networkFilter, retriever->actNumEntries = 0, retriever->totNumEntries = 0,
+    retriever->poolFilter = pool_filter, retriever->bridge_iface_idx = 0;
+  retriever->ipVersionFilter = ipver_filter;
+  retriever->filteredHosts = filtered_hosts;
+  retriever->blacklistedHosts = blacklisted_hosts;
+  retriever->hideTopHidden = hide_top_hidden;
+  retriever->ndpi_proto = proto_filter;
+  retriever->gper = gper;
+
+  if((!strcmp(sortColumn, "column_ip")) || (!strcmp(sortColumn, "column_"))) retriever->sorter = column_ip, retriever->sort_func = hostSorter;
+  else if(!strcmp(sortColumn, "column_vlan")) retriever->sorter = column_vlan, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_alerts")) retriever->sorter = column_alerts, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_name")) retriever->sorter = column_name, retriever->sort_func = stringSorter;
+  else if(!strcmp(sortColumn, "column_country")) retriever->sorter = column_country, retriever->sort_func = stringSorter;
+  else if(!strcmp(sortColumn, "column_os")) retriever->sorter = column_os, retriever->sort_func = stringSorter;
+  else if(!strcmp(sortColumn, "column_since")) retriever->sorter = column_since, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_asn")) retriever->sorter = column_asn, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_thpt")) retriever->sorter = column_thpt, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_num_flows")) retriever->sorter = column_num_flows, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_num_dropped_flows")) retriever->sorter = column_num_dropped_flows, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_traffic")) retriever->sorter = column_traffic, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_local_network_id")) retriever->sorter = column_local_network_id, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_local_network")) retriever->sorter = column_local_network, retriever->sort_func = ipNetworkSorter;
+  else if(!strcmp(sortColumn, "column_mac")) retriever->sorter = column_mac, retriever->sort_func = numericSorter;
+  /* criteria (datatype sortField in ntop_typedefs.h / see also host_search_walker:NetworkInterface.cpp) */
+  else if(!strcmp(sortColumn, "column_uploaders")) retriever->sorter = column_uploaders, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_downloaders")) retriever->sorter = column_downloaders, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_unknowers")) retriever->sorter = column_unknowers, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_incomingflows")) retriever->sorter = column_incomingflows, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_outgoingflows")) retriever->sorter = column_outgoingflows, retriever->sort_func = numericSorter;
+  else if(!strcmp(sortColumn, "column_pool_id")) retriever->sorter = column_pool_id, retriever->sort_func = numericSorter;
+  else {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Unknown sort column %s", sortColumn);
+    retriever->sorter = column_traffic, retriever->sort_func = numericSorter;
+  }
+
+  // make sure the caller has disabled the purge!!
+  walker(begin_slot, walk_all, walker_hosts, host_grouper_walker, (void*)retriever);
+
+  return(retriever->actNumEntries);
+}
+
 int NetworkInterface::sortHosts(u_int32_t *begin_slot,
 				bool walk_all,
 				struct flowHostRetriever *retriever,
@@ -5081,7 +5153,7 @@ int NetworkInterface::getActiveHostsGroup(lua_State* vm,
   disablePurge(false);
 
   // sort hosts according to the grouping criterion
-  if(sortHosts(begin_slot, walk_all,
+  if(groupHosts(begin_slot, walk_all,
 	       &retriever, 0 /* bridge_iface_idx TODO */,
 	       allowed_hosts, host_details, location,
 	       countryFilter, NULL /* Mac */, vlan_id,
@@ -5089,36 +5161,14 @@ int NetworkInterface::getActiveHostsGroup(lua_State* vm,
 	       filtered_hosts, false /* no blacklisted hosts filter */, false, false,
 	       ipver_filter, -1 /* no protocol filter */,
 	       traffic_type_all /* no traffic type filter */,
-	       groupColumn) < 0 ) {
-    enablePurge(false);
-    return -1;
-  }
-
-  // build a new grouper that will help in aggregating stats
-  if((gper = new(std::nothrow) Grouper(retriever.sorter)) == NULL) {
-    ntop->getTrace()->traceEvent(TRACE_ERROR,
-				 "Unable to allocate memory for a Grouper.");
+	       groupColumn, gper) < 0 ) {
     enablePurge(false);
     return -1;
   }
 
   lua_newtable(vm);
 
-  for(int i = 0; i < (int)retriever.actNumEntries; i++) {
-    Host *h = retriever.elems[i].hostValue;
-
-    if(h) {
-      if(gper->inGroup(h) == false) {
-	if(gper->getNumEntries() > 0)
-	  gper->lua(vm);
-	gper->newGroup(h);
-      }
-
-      gper->incStats(h);
-    }
-  }
-
-  if(gper->getNumEntries() > 0)
+  if(gper->getNumGroups() > 0)
     gper->lua(vm);
 
   delete gper;
@@ -5126,23 +5176,7 @@ int NetworkInterface::getActiveHostsGroup(lua_State* vm,
 
   enablePurge(false);
 
-  // it's up to us to clean sorted data
-  // make sure first to free elements in case a string sorter has been used
-  if((retriever.sorter == column_name)
-     || (retriever.sorter == column_country)
-     || (retriever.sorter == column_os)) {
-    for(u_int i=0; i<retriever.maxNumEntries; i++)
-      if(retriever.elems[i].stringValue)
-	free(retriever.elems[i].stringValue);
-  } else if(retriever.sorter == column_local_network)
-    for(u_int i=0; i<retriever.maxNumEntries; i++)
-      if(retriever.elems[i].ipValue)
-	delete retriever.elems[i].ipValue;
-
-  // finally free the elements regardless of the sorted kind
-  if(retriever.elems) free(retriever.elems);
-
-  return(retriever.actNumEntries);
+  return(retriever.totNumEntries);
 }
 
 /* **************************************************** */
