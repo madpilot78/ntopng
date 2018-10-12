@@ -294,7 +294,7 @@ void Grouper::lua(lua_State* vm) {
 
     if(sorter == column_mac) // special case for mac
       lua_push_str_table_entry(vm, "id", groups[i]->group_label);
-    else if(!group_id_s){ // integer group id
+    else if(!groups[i]->group_id_s){ // integer group id
       lua_push_int32_table_entry(vm, "id", groups[i]->group_id_i);
     } else { // string group id
       lua_push_str_table_entry(vm, "id", groups[i]->group_id_s);
