@@ -3882,6 +3882,9 @@ static bool host_grouper_walker(GenericHashEntry *he, void *user_data, bool *mat
     r->gper->incStats(h);
 
     r->totNumEntries++;
+
+  *matched = true;
+  return(false); /* false = keep on walking */
 }
 
 static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *matched) {
