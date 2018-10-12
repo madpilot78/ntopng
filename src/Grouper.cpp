@@ -144,7 +144,7 @@ int32_t Grouper::newGroup(Host *h) {
   case column_local_network:
   case column_local_network_id:
     groups[numGroups]->group_id_i = h->get_local_network_id();
-    if(group_id_i >= 0)
+    if(groups[numGroups]->group_id_i >= 0)
       groups[numGroups]->group_label = strdup(ntop->getLocalNetworkName(h->get_local_network_id()));
     else
       groups[numGroups]->group_label = strdup((char*)UNKNOWN_LOCAL_NETWORK);
@@ -166,13 +166,13 @@ int32_t Grouper::newGroup(Host *h) {
       char buf[32], *c = h->get_country(buf, sizeof(buf));
       
       groups[numGroups]->group_id_s  = strdup(c);
-      groups[numGroups]->group_label = strdup(group_id_s);
+      groups[numGroups]->group_label = strdup(groups[numGroups]->group_id_s);
     }
     break;
 
   case column_os:
     groups[numGroups]->group_id_s  = strdup(h->get_os() ? h->get_os() : (char*)UNKNOWN_OS);
-    groups[numGroups]->group_label = strdup(group_id_s);
+    groups[numGroups]->group_label = strdup(groups[numGroups]->group_id_s);
     break;
 
   default:
