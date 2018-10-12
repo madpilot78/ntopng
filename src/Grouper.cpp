@@ -26,6 +26,7 @@
 Grouper::Grouper(sortField sf){
   sorter = sf;
   numGroups = 0;
+  groups = NULL;
 }
 
 /* *************************************** */
@@ -40,6 +41,8 @@ Grouper::~Grouper(){
       free(groups[i]);
     }
   }
+  if(groups)
+    free(groups);
 }
 
 /* *************************************** */
@@ -111,9 +114,17 @@ int32_t Grouper::inGroup(Host *h) {
  */
 int32_t Grouper::newGroup(Host *h) {
   char buf[32];
+  group *newg[];
 
   if(h == NULL)
     return -1;
+
+  newg = (group **)realloc(groups, sizeof(struct group) * (numGroups + 1));
+  if(newg == NULL) {
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+    return -1
+  }
+  groups = newg;
 
   groups[numGroups] = (group *)malloc(sizeof(struct group));
   memset(groups[numGroups], 0, sizeof(sizeof(struct group)));
@@ -165,6 +176,7 @@ int32_t Grouper::newGroup(Host *h) {
     break;
 
   default:
+    free(groups[numGroups]); // Avoid memory leak
     return -1;
   };
 
