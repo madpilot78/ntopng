@@ -114,7 +114,7 @@ int32_t Grouper::inGroup(Host *h) {
  */
 int32_t Grouper::newGroup(Host *h) {
   char buf[32];
-  group *newg[];
+  group **newg;
 
   if(h == NULL)
     return -1;
