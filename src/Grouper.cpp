@@ -199,24 +199,24 @@ int8_t Grouper::incStats(Host *h) {
   if(h == NULL || gid == -1)
     return -1;
 
-  groups[i]->stats.num_hosts++,
-    groups[i]->stats.bytes_sent += h->getNumBytesSent(),
-    groups[i]->stats.bytes_rcvd += h->getNumBytesRcvd(),
-    groups[i]->stats.num_flows += h->getNumActiveFlows(),
-    groups[i]->stats.num_dropped_flows += h->getNumDroppedFlows(),
-    groups[i]->stats.num_alerts += h->getNumAlerts(),
-    groups[i]->stats.throughput_bps += h->getBytesThpt(),
-    groups[i]->stats.throughput_pps += h->getPacketsThpt(),
-    groups[i]->stats.throughput_trend_bps_diff += h->getThptTrendDiff();
+  groups[gid]->stats.num_hosts++,
+    groups[gid]->stats.bytes_sent += h->getNumBytesSent(),
+    groups[gid]->stats.bytes_rcvd += h->getNumBytesRcvd(),
+    groups[gid]->stats.num_flows += h->getNumActiveFlows(),
+    groups[gid]->stats.num_dropped_flows += h->getNumDroppedFlows(),
+    groups[gid]->stats.num_alerts += h->getNumAlerts(),
+    groups[gid]->stats.throughput_bps += h->getBytesThpt(),
+    groups[gid]->stats.throughput_pps += h->getPacketsThpt(),
+    groups[gid]->stats.throughput_trend_bps_diff += h->getThptTrendDiff();
 
-  if(groups[i]->stats.first_seen == 0 || h->get_first_seen() < groups[i]->stats.first_seen)
-    groups[i]->stats.first_seen = h->get_first_seen();
-  if(h->get_last_seen() > groups[i]->stats.last_seen)
-    groups[i]->stats.last_seen = h->get_last_seen();  
+  if(groups[gid]->stats.first_seen == 0 || h->get_first_seen() < groups[gid]->stats.first_seen)
+    groups[gid]->stats.first_seen = h->get_first_seen();
+  if(h->get_last_seen() > groups[gid]->stats.last_seen)
+    groups[gid]->stats.last_seen = h->get_last_seen();
 
   if(c) {
-    strncpy(groups[i]->stats.country, c, sizeof(groups[i]->stats.country));
-    groups[i]->stats.country[sizeof(groups[i]->stats.country) - 1] = '\0';
+    strncpy(groups[gid]->stats.country, c, sizeof(groups[gid]->stats.country));
+    groups[gid]->stats.country[sizeof(groups[gid]->stats.country) - 1] = '\0';
   }
 
   return 0;
