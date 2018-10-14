@@ -4703,10 +4703,17 @@ int NetworkInterface::groupHosts(u_int32_t *begin_slot,
     retriever->sorter = column_traffic, retriever->sort_func = numericSorter;
   }
 
+  // build a new grouper that will help in aggregating stats
+  if((gper = new(std::nothrow) Grouper(retriever->sorter)) == NULL) {
+    ntop->getTrace()->traceEvent(TRACE_ERROR,
+				 "Unable to allocate memory for a Grouper.");
+    return -1;
+  }
+
   // make sure the caller has disabled the purge!!
   walker(begin_slot, walk_all, walker_hosts, host_grouper_walker, (void*)retriever);
 
-  return(retriever->actNumEntries);
+  return(retriever->totNumEntries);
 }
 
 int NetworkInterface::sortHosts(u_int32_t *begin_slot,
@@ -5170,7 +5177,8 @@ int NetworkInterface::getActiveHostsGroup(lua_State* vm,
 
   lua_newtable(vm);
 
-  if(gper->getNumGroups() > 0)
+  retriever.actNumEntries = gper->getNumGroups();
+  if(retriever.actNumEntries > 0)
     gper->lua(vm);
 
   delete gper;
@@ -5178,7 +5186,7 @@ int NetworkInterface::getActiveHostsGroup(lua_State* vm,
 
   enablePurge(false);
 
-  return(retriever.totNumEntries);
+  return(retriever.actNumEntries);
 }
 
 /* **************************************************** */
