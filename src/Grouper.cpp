@@ -127,6 +127,10 @@ int32_t Grouper::newGroup(Host *h) {
   groups = newg;
 
   groups[numGroups] = (group *)malloc(sizeof(struct group));
+  if(groups[numGroups] == NULL){
+    ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+    return -1;
+  }
   memset(groups[numGroups], 0, sizeof(sizeof(struct group)));
 
   switch(sorter) {
