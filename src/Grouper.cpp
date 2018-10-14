@@ -54,7 +54,7 @@ Grouper::~Grouper(){
  */
 int32_t Grouper::inGroup(Host *h) {
   if(h == NULL)
-    return false;
+    return -1;
 
   for(int32_t i = 0; i < numGroups; i++) {
   switch(sorter){
