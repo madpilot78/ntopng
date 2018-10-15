@@ -131,7 +131,7 @@ int32_t Grouper::newGroup(Host *h) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
     return -1;
   }
-  memset(groups[numGroups], 0, sizeof(sizeof(struct group)));
+  memset(groups[numGroups], 0, sizeof(struct group));
 
   switch(sorter) {
   case column_asn:
