@@ -4599,6 +4599,7 @@ int NetworkInterface::sortPageHosts(u_int32_t *begin_slot,
     retriever->blacklistedHosts = blacklisted_hosts,
     retriever->hideTopHidden = hide_top_hidden,
     retriever->ndpi_proto = proto_filter,
+    retriever->traffic_type = traffic_type_filter,
     retriever->maxNumEntries = maxHits,
     retriever->toSkip = toSkip,
     retriever->firstPos = 0,
@@ -4681,7 +4682,12 @@ int NetworkInterface::groupHosts(u_int32_t *begin_slot,
     retriever->filteredHosts = filtered_hosts,
     retriever->blacklistedHosts = blacklisted_hosts,
     retriever->hideTopHidden = hide_top_hidden,
-  retriever->ndpi_proto = proto_filter;
+    retriever->ndpi_proto = proto_filter,
+    retriever->traffic_type = traffic_type_filter,
+    retriever->ipVersionFilter = ipver_filter,
+    retriever->filteredHosts = filtered_hosts,
+    retriever->blacklistedHosts = blacklisted_hosts,
+  retriever->hideTopHidden = hide_top_hidden;
 
   if((!strcmp(sortColumn, "column_ip")) || (!strcmp(sortColumn, "column_"))) retriever->sorter = column_ip, retriever->sort_func = hostSorter;
   else if(!strcmp(sortColumn, "column_vlan")) retriever->sorter = column_vlan, retriever->sort_func = numericSorter;
