@@ -3859,17 +3859,19 @@ static bool host_grouper_walker(GenericHashEntry *he, void *user_data, bool *mat
     return(false);
 
   if((r->location == location_local_only      && !h->isLocalHost())                       ||
-   (r->location == location_remote_only     && h->isLocalHost())                        ||
-   ((r->vlan_id != ((u_int16_t)-1)) && (r->vlan_id != h->get_vlan_id()))                ||
-   ((r->ndpi_proto != -1) && (h->get_ndpi_stats()->getProtoBytes(r->ndpi_proto) == 0))  ||
-   ((r->asnFilter != (u_int32_t)-1)     && (r->asnFilter       != h->get_asn()))        ||
-   ((r->networkFilter != -2) && (r->networkFilter != h->get_local_network_id()))        ||
-   (r->mac           && (!h->getMac()->equal(r->mac)))    ||
-   ((r->poolFilter != (u_int16_t)-1)    && (r->poolFilter    != h->get_host_pool()))    ||
-   (r->country  && strlen(r->country)  && strcmp(h->get_country(buf, sizeof(buf)), r->country)) ||
-   (r->osFilter && strlen(r->osFilter) && (!h->get_os()      || strcmp(h->get_os(), r->osFilter)))     ||
-   (r->blacklistedHosts && !h->isBlacklisted())     ||
-   (r->hideTopHidden && h->isHiddenFromTop())     ||
+     (r->location == location_remote_only     && h->isLocalHost())                        ||
+     ((r->vlan_id != ((u_int16_t)-1)) && (r->vlan_id != h->get_vlan_id()))                ||
+     ((r->ndpi_proto != -1) && (h->get_ndpi_stats()->getProtoBytes(r->ndpi_proto) == 0))  ||
+     ((r->asnFilter != (u_int32_t)-1)     && (r->asnFilter       != h->get_asn()))        ||
+     ((r->networkFilter != -2) && (r->networkFilter != h->get_local_network_id()))        ||
+     (r->mac           && (!h->getMac()->equal(r->mac)))    ||
+     ((r->poolFilter != (u_int16_t)-1)    && (r->poolFilter    != h->get_host_pool()))    ||
+     (r->country  && strlen(r->country)  && strcmp(h->get_country(buf, sizeof(buf)), r->country)) ||
+     (r->osFilter && strlen(r->osFilter) && (!h->get_os()      || strcmp(h->get_os(), r->osFilter)))     ||
+     (r->blacklistedHosts && !h->isBlacklisted())     ||
+     (r->hideTopHidden && h->isHiddenFromTop())       ||
+     (r->traffic_type == traffic_type_one_way && !h->isOneWayTraffic())       ||
+     (r->traffic_type == traffic_type_bidirectional && h->isOneWayTraffic())  ||
 #ifdef NTOPNG_PRO
    (r->filteredHosts && !h->hasBlockedTraffic()) ||
 #endif
@@ -3907,7 +3909,9 @@ static bool host_pagesearch_walker(GenericHashEntry *he, void *user_data, bool *
      (r->country  && strlen(r->country)  && strcmp(h->get_country(buf, sizeof(buf)), r->country)) ||
      (r->osFilter && strlen(r->osFilter) && (!h->get_os()      || strcmp(h->get_os(), r->osFilter)))     ||
      (r->blacklistedHosts && !h->isBlacklisted())     ||
-     (r->hideTopHidden && h->isHiddenFromTop())     ||
+     (r->hideTopHidden && h->isHiddenFromTop())       ||
+     (r->traffic_type == traffic_type_one_way && !h->isOneWayTraffic())       ||
+     (r->traffic_type == traffic_type_bidirectional && h->isOneWayTraffic())  ||
 #ifdef NTOPNG_PRO
      (r->filteredHosts && !h->hasBlockedTraffic()) ||
 #endif
@@ -4568,6 +4572,7 @@ int NetworkInterface::sortPageHosts(u_int32_t *begin_slot,
 				bool blacklisted_hosts, bool hide_top_hidden,
 				u_int8_t ipver_filter, int proto_filter,
 				char *sortColumn, u_int32_t maxHits,
+				TrafficType traffic_type_filter,
 				u_int32_t toSkip) {
   u_int8_t macAddr[6];
 
@@ -4649,6 +4654,7 @@ int NetworkInterface::groupHosts(u_int32_t *begin_slot,
 				u_int16_t pool_filter, bool filtered_hosts,
 				bool blacklisted_hosts, bool hide_top_hidden,
 				u_int8_t ipver_filter, int proto_filter,
+				TrafficType traffic_type_filter,
 				char *sortColumn) {
   u_int8_t macAddr[6];
 
