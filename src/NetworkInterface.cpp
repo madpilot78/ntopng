@@ -4649,7 +4649,7 @@ int NetworkInterface::groupHosts(u_int32_t *begin_slot,
 				u_int16_t pool_filter, bool filtered_hosts,
 				bool blacklisted_hosts, bool hide_top_hidden,
 				u_int8_t ipver_filter, int proto_filter,
-				char *sortColumn, Grouper *gper) {
+				char *sortColumn) {
   u_int8_t macAddr[6];
 
   if(retriever == NULL)
@@ -4674,7 +4674,6 @@ int NetworkInterface::groupHosts(u_int32_t *begin_slot,
   retriever->blacklistedHosts = blacklisted_hosts;
   retriever->hideTopHidden = hide_top_hidden;
   retriever->ndpi_proto = proto_filter;
-  retriever->gper = gper;
 
   if((!strcmp(sortColumn, "column_ip")) || (!strcmp(sortColumn, "column_"))) retriever->sorter = column_ip, retriever->sort_func = hostSorter;
   else if(!strcmp(sortColumn, "column_vlan")) retriever->sorter = column_vlan, retriever->sort_func = numericSorter;
@@ -5157,7 +5156,6 @@ int NetworkInterface::getActiveHostsGroup(lua_State* vm,
 					  u_int8_t ipver_filter,
 					  char *groupColumn) {
   struct flowHostRetriever retriever;
-  Grouper *gper;
 
   disablePurge(false);
 
@@ -5170,19 +5168,19 @@ int NetworkInterface::getActiveHostsGroup(lua_State* vm,
 	       filtered_hosts, false /* no blacklisted hosts filter */, false, false,
 	       ipver_filter, -1 /* no protocol filter */,
 	       traffic_type_all /* no traffic type filter */,
-	       groupColumn, gper) < 0 ) {
+	       groupColumn) < 0 ) {
     enablePurge(false);
     return -1;
   }
 
   lua_newtable(vm);
 
-  retriever.actNumEntries = gper->getNumGroups();
+  retriever.actNumEntries = retriever.gper->getNumGroups();
   if(retriever.actNumEntries > 0)
-    gper->lua(vm);
+    retriever.gper->lua(vm);
 
-  delete gper;
-  gper = NULL;
+  delete retriever.gper;
+  retriever.gper = NULL;
 
   enablePurge(false);
 

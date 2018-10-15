@@ -204,7 +204,7 @@ class NetworkInterface : public Checkpointable {
 		u_int16_t pool_filter, bool filtered_hosts,
     bool blacklisted_hosts, bool hide_top_hidden,
     u_int8_t ipver_filter, int proto_filter,
-		char *sortColumn, Grouper *gper);
+		char *sortColumn);
   int sortHosts(u_int32_t *begin_slot,
 		bool walk_all,
 		struct flowHostRetriever *retriever,
