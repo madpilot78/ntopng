@@ -266,12 +266,12 @@ void Grouper::lua(lua_State* vm) {
     case column_local_network_id:
     case column_pool_id:
     case column_mac:
-      qsort(&groups, numGroups, sizeof(Host *), id_i_sorter);
+      qsort(&groups, numGroups, sizeof(group *), id_i_sorter);
       break;
 
     case column_country:
     case column_os:
-      qsort(&groups, numGroups, sizeof(Host *), id_s_sorter);
+      qsort(&groups, numGroups, sizeof(group *), id_s_sorter);
       break;
 
     default:
