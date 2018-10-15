@@ -82,17 +82,17 @@ int32_t Grouper::inGroup(Host *h) {
     case column_country:
       {
         char buf[32], *c = h->get_country(buf, sizeof(buf));
-        if(strcmp(groups[i]->group_id_s, c) == 0)
+        if(groups[i]->group_id_s != NULL && strcmp(groups[i]->group_id_s, c) == 0)
           return i;
       }
       break;
       
     case column_os:
       if(h->get_os()) {
-        if(strcmp(groups[i]->group_id_s, h->get_os()) == 0)
+        if(groups[i]->group_id_s != NULL && strcmp(groups[i]->group_id_s, h->get_os()) == 0)
           return i;
       } else {
-        if(strcmp(groups[i]->group_id_s, (char*)UNKNOWN_OS) == 0)
+        if(groups[i]->group_id_s != NULL && strcmp(groups[i]->group_id_s, (char*)UNKNOWN_OS) == 0)
           return i;
       }
   
