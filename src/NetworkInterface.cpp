@@ -4704,7 +4704,7 @@ int NetworkInterface::groupHosts(u_int32_t *begin_slot,
   }
 
   // build a new grouper that will help in aggregating stats
-  if((gper = new(std::nothrow) Grouper(retriever->sorter)) == NULL) {
+  if((retriever->gper = new(std::nothrow) Grouper(retriever->sorter)) == NULL) {
     ntop->getTrace()->traceEvent(TRACE_ERROR,
 				 "Unable to allocate memory for a Grouper.");
     return -1;
