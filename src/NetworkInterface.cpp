@@ -4571,8 +4571,8 @@ int NetworkInterface::sortPageHosts(u_int32_t *begin_slot,
 				u_int16_t pool_filter, bool filtered_hosts,
 				bool blacklisted_hosts, bool hide_top_hidden,
 				u_int8_t ipver_filter, int proto_filter,
-				char *sortColumn, u_int32_t maxHits,
 				TrafficType traffic_type_filter,
+				char *sortColumn, u_int32_t maxHits,
 				u_int32_t toSkip) {
   u_int8_t macAddr[6];
 
