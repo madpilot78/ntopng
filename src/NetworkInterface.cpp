@@ -4591,16 +4591,17 @@ int NetworkInterface::sortPageHosts(u_int32_t *begin_slot,
   retriever->allowed_hosts = allowed_hosts, retriever->location = location,
     retriever->country = countryFilter, retriever->vlan_id = vlan_id,
     retriever->osFilter = osFilter, retriever->asnFilter = asnFilter,
-    retriever->networkFilter = networkFilter, retriever->actNumEntries = 0, retriever->totNumEntries = 0,
+    retriever->networkFilter = networkFilter, retriever->actNumEntries = 0,
+    retriever->totNumEntries = 0,
     retriever->poolFilter = pool_filter, retriever->bridge_iface_idx = 0;
-  retriever->ipVersionFilter = ipver_filter;
-  retriever->filteredHosts = filtered_hosts;
-  retriever->blacklistedHosts = blacklisted_hosts;
-  retriever->hideTopHidden = hide_top_hidden;
-  retriever->ndpi_proto = proto_filter;
-  retriever->maxNumEntries = maxHits;
-  retriever->toSkip = toSkip;
-  retriever->firstPos = 0;
+    retriever->ipVersionFilter = ipver_filter,
+    retriever->filteredHosts = filtered_hosts,
+    retriever->blacklistedHosts = blacklisted_hosts,
+    retriever->hideTopHidden = hide_top_hidden,
+    retriever->ndpi_proto = proto_filter,
+    retriever->maxNumEntries = maxHits,
+    retriever->toSkip = toSkip,
+    retriever->firstPos = 0,
   retriever->elems = (struct flowHostRetrieveList*)calloc(sizeof(struct flowHostRetrieveList), retriever->maxNumEntries);
 
   if(retriever->elems == NULL) {
@@ -4673,12 +4674,13 @@ int NetworkInterface::groupHosts(u_int32_t *begin_slot,
   retriever->allowed_hosts = allowed_hosts, retriever->location = location,
     retriever->country = countryFilter, retriever->vlan_id = vlan_id,
     retriever->osFilter = osFilter, retriever->asnFilter = asnFilter,
-    retriever->networkFilter = networkFilter, retriever->actNumEntries = 0, retriever->totNumEntries = 0,
-    retriever->poolFilter = pool_filter, retriever->bridge_iface_idx = 0;
-  retriever->ipVersionFilter = ipver_filter;
-  retriever->filteredHosts = filtered_hosts;
-  retriever->blacklistedHosts = blacklisted_hosts;
-  retriever->hideTopHidden = hide_top_hidden;
+    retriever->networkFilter = networkFilter, retriever->actNumEntries = 0,
+    retriever->totNumEntries = 0,
+    retriever->poolFilter = pool_filter, retriever->bridge_iface_idx = 0,
+    retriever->ipVersionFilter = ipver_filter,
+    retriever->filteredHosts = filtered_hosts,
+    retriever->blacklistedHosts = blacklisted_hosts,
+    retriever->hideTopHidden = hide_top_hidden,
   retriever->ndpi_proto = proto_filter;
 
   if((!strcmp(sortColumn, "column_ip")) || (!strcmp(sortColumn, "column_"))) retriever->sorter = column_ip, retriever->sort_func = hostSorter;
