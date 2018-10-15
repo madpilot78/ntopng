@@ -4602,7 +4602,7 @@ int NetworkInterface::sortPageHosts(u_int32_t *begin_slot,
     retriever->traffic_type = traffic_type_filter,
     retriever->maxNumEntries = maxHits,
     retriever->toSkip = toSkip,
-    retriever->firstPos = 0,
+    retriever->firstPos = 0;
   retriever->elems = (struct flowHostRetrieveList*)calloc(sizeof(struct flowHostRetrieveList), retriever->maxNumEntries);
 
   if(retriever->elems == NULL) {
