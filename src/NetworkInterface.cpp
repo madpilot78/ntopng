@@ -4593,7 +4593,7 @@ int NetworkInterface::sortPageHosts(u_int32_t *begin_slot,
     retriever->osFilter = osFilter, retriever->asnFilter = asnFilter,
     retriever->networkFilter = networkFilter, retriever->actNumEntries = 0,
     retriever->totNumEntries = 0,
-    retriever->poolFilter = pool_filter, retriever->bridge_iface_idx = 0;
+    retriever->poolFilter = pool_filter, retriever->bridge_iface_idx = 0,
     retriever->ipVersionFilter = ipver_filter,
     retriever->filteredHosts = filtered_hosts,
     retriever->blacklistedHosts = blacklisted_hosts,
