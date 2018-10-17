@@ -126,12 +126,14 @@ int32_t Grouper::newGroup(Host *h) {
   }
   groups = newg;
 
-  groups[numGroups] = (group *)malloc(sizeof(struct group));
   if(groups[numGroups] == NULL) {
-    ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
-    return -1;
-  }
-  memset(groups[numGroups], 0, sizeof(struct group));
+    groups[numGroups] = (group *)malloc(sizeof(struct group));
+    if(groups[numGroups] == NULL) {
+      ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
+      return -1;
+    }
+    memset(groups[numGroups], 0, sizeof(struct group));
+  } // else was already allocated in a previous iteration falling in the default case below
 
   switch(sorter) {
   case column_asn:
@@ -180,7 +182,6 @@ int32_t Grouper::newGroup(Host *h) {
     break;
 
   default:
-    free(groups[numGroups]); // Avoid memory leak
     return -1;
   };
 
