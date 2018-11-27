@@ -316,7 +316,7 @@ void Grouper::lua(lua_State* vm) {
   for(int32_t i = 0, j = 0; i < HASH_SIZE; i++) {
     g = hash[i];
     while(g) {
-      groups[j++] = &hash[i];
+      groups[j++] = g;
       g = hash[i]->next;
     }
   }
