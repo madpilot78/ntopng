@@ -237,7 +237,7 @@ group * Grouper::newGroup(Host *h) {
 
 group * Grouper::addGroup(group *g)
 {
-  group *pos;
+  group *pos = NULL;
 
   if(g == NULL)
     return NULL;
@@ -264,10 +264,7 @@ group * Grouper::addGroup(group *g)
       break;
   }
 
-  if(pos)
-    while(pos->next)
-      pos = pos->next;
-
+  g->next = pos;
   pos = g;
   numGroups++;
 
