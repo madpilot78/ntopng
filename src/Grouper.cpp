@@ -311,8 +311,7 @@ int8_t Grouper::incStats(Host *h) {
  * Recursively add groups to LUA tables.
  */
 void Grouper::lua(lua_State* vm) {
-  group *g;
-  group **groups = (group **)calloc(numGroups, sizeof(group *));
+  group *g, **groups = (group **)calloc(numGroups, sizeof(group *));
 
   for(int32_t i = 0, j = 0; i < HASH_SIZE; i++) {
     g = hash[i];
