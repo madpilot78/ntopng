@@ -254,7 +254,7 @@ group * Grouper::addGroup(group *g)
 
     case column_country:
     case column_os:
-      pos = hash[fnv_32a(g->group_id.i)];
+      pos = hash[fnv_32a(g->group_id.s)];
       break;
 
     default:
