@@ -57,7 +57,7 @@ class Grouper {
  private:
   sortField sorter;
 
-  group *hash[HASH_SIZE];
+  group *hash[HASH_SIZE] = {NULL};
   int32_t numGroups;
 
   group * addGroup(group *g);
