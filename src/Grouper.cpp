@@ -112,7 +112,6 @@ int id_s_comparator(const void *_a, const void *_b) {
  */
 group * Grouper::inGroup(Host *h) {
   group *k, m;
-  u_int32_t h;
 
   if(h == NULL)
     return NULL;
