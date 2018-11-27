@@ -111,7 +111,7 @@ int id_s_comparator(const void *_a, const void *_b) {
  * Returns -1 for unsupported sorting criteria, causes host to be skipped.
  */
 group * Grouper::inGroup(Host *h) {
-  group *k, m;
+  group *k, *m;
 
   if(h == NULL)
     return NULL;
