@@ -29,7 +29,8 @@
 Grouper::Grouper(sortField sf){
   sorter = sf;
   numGroups = 0;
-  memset(hash, NULL, HASH_SIZE * sizeof(ghash_el *));
+  for(int32_t i = 0; i < HASH_SIZE; i++)
+    hash[i] = NULL;
 }
 
 /* *************************************** */
