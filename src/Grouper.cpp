@@ -61,7 +61,7 @@ u_int32_t fnv_32a(char *str)
   u_int32_t hval = FNV1_32A_INIT;
 
   while (*s) {
-    hval ^= (Fnv32_t)*s++;
+    hval ^= (u_int32_t)*s++;
     hval *= FNV_32_PRIME;
   }
 
