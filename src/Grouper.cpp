@@ -317,12 +317,37 @@ int8_t Grouper::incStats(Host *h) {
  * Recursively add groups to LUA tables.
  */
 void Grouper::lua(lua_State* vm) {
+  group *g;
+  group **groups = (group **)calloc(numGroups, sozeof(group *));
 
-  /*
-   * TODO
-   *
-   * move hash to a correctly sized array and sort that.
-   */
+  for(int32_t i = 0, j = 0; i < HASH_SIZE; i++) {
+    g = hash[i];
+    while(g) {
+      groups[j++] = hash[i];
+      g = hash[i]->next;
+    }
+  }
+
+  switch(sorter) {
+    case column_asn:
+    case column_vlan:
+    case column_local_network:
+    case column_local_network_id:
+    case column_pool_id:
+    case column_mac:
+      qsort(groups, numGroups, sizeof(group *), id_i_comparator);
+      break;
+
+    case column_country:
+    case column_os:
+      qsort(groups, numGroups, sizeof(group *), id_s_comparator);
+      break;
+
+    default:
+      // Unknown criteria, return empty list
+      return;
+      break;
+  }
 
   for(int32_t i = 0; i < numGroups; i++) {
     lua_newtable(vm);
