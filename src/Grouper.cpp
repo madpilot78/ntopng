@@ -127,7 +127,7 @@ group * Grouper::inGroup(Host *h) {
     case column_local_network_id:
     case column_pool_id:
     case column_mac:
-      m = hash[int_hash(k->group_id.i)]
+      m = hash[int_hash(k->group_id.i)];
       while(m) {
         if(m->group_id.i == k->group_id.i) {
           return m;
@@ -138,7 +138,7 @@ group * Grouper::inGroup(Host *h) {
 
     case column_country:
     case column_os:
-      m = hash[fnv_32a(k->group_id.s)]
+      m = hash[fnv_32a(k->group_id.s)];
       while(m) {
         if(strcmp(m->group_id.s, k->group_id.s) == 0) {
           return m;
