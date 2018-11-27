@@ -170,12 +170,11 @@ group * Grouper::newGroup(Host *h) {
   if(h == NULL)
     return NULL;
 
-  g = (group *)malloc(sizeof(struct group));
+  g = (group *)calloc(1, sizeof(struct group));
   if(g == NULL) {
     ntop->getTrace()->traceEvent(TRACE_WARNING, "Not enough memory");
     return NULL;
   }
-  memset(g, 0, sizeof(struct group));
 
   switch(sorter) {
   case column_asn:
