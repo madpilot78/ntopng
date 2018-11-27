@@ -249,12 +249,12 @@ group * Grouper::addGroup(group *g)
     case column_local_network_id:
     case column_pool_id:
     case column_mac:
-      pos = hash[int_hash(k->group_id.i)];
+      pos = hash[int_hash(g->group_id.i)];
       break;
 
     case column_country:
     case column_os:
-      pos = hash[fnv_32a(k->group_id.i)];
+      pos = hash[fnv_32a(g->group_id.i)];
       break;
 
     default:
