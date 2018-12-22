@@ -313,7 +313,7 @@ int8_t Grouper::incStats(Host *h) {
 void Grouper::lua(lua_State* vm) {
   group *g, **groups = (group **)calloc(numGroups, sizeof(group *));
 
-  /* flatten hash to an array */
+  /* Flatten hash to an array */
   for(int32_t i = 0, j = 0; i < HASH_SIZE; i++) {
     g = hash[i];
     while(g) {
