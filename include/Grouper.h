@@ -60,7 +60,7 @@ class Grouper {
   group *hash[HASH_SIZE] = {NULL};
   int32_t numGroups;
 
-  group * addGroup(group *g);
+  group * addGroup(group *g, int32_t pos);
   group * newGroup(Host *h);
   group * inGroup(Host *h);
 

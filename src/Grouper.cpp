@@ -110,6 +110,7 @@ int id_s_comparator(const void *_a, const void *_b) {
  */
 group * Grouper::inGroup(Host *h) {
   group *k, *m;
+  int32_t pos;
 
   if(h == NULL)
     return NULL;
@@ -125,23 +126,23 @@ group * Grouper::inGroup(Host *h) {
     case column_local_network_id:
     case column_pool_id:
     case column_mac:
-      m = hash[int_hash(k->group_id.i)];
-      while(m) {
-        if(m->group_id.i == k->group_id.i) {
-          return m;
+      pos = int_hash(k->group_id.i);
+      while(hash[pos]) {
+        if(hash[pos]->group_id.i == k->group_id.i) {
+          return hash[pos];
         }
-        m = m->next;
+        hash[pos] = hash[pos]->next;
       }
       break;
 
     case column_country:
     case column_os:
-      m = hash[fnv_32a(k->group_id.s)];
-      while(m) {
-        if(strcmp(m->group_id.s, k->group_id.s) == 0) {
-          return m;
+      pos = fnv_32a(k->group_id.s);
+      while(hash[pos]) {
+        if(strcmp(hash[pos]->group_id.s, k->group_id.s) == 0) {
+          return hash[pos];
         }
-        m = m->next;
+        hash[pos] = hash[pos]->next;
       }
       break;
 
@@ -153,7 +154,7 @@ group * Grouper::inGroup(Host *h) {
   }
 
   // No existing group matched, add a new one
-  return addGroup(k);
+  return addGroup(k, pos);
 }
 
 /* *************************************** */
@@ -232,34 +233,10 @@ group * Grouper::newGroup(Host *h) {
 
 /* *************************************** */
 
-group * Grouper::addGroup(group *g)
+group * Grouper::addGroup(group *g, int32_t pos)
 {
-  int32_t pos;
-
   if(g == NULL)
     return NULL;
-
-  switch(sorter) {
-    case column_asn:
-    case column_vlan:
-    case column_local_network:
-    case column_local_network_id:
-    case column_pool_id:
-    case column_mac:
-      pos = int_hash(g->group_id.i);
-      break;
-
-    case column_country:
-    case column_os:
-      pos = fnv_32a(g->group_id.s);
-      break;
-
-    default:
-      // Unknown criteria, abort operation
-      free(g);
-      return NULL;
-      break;
-  }
 
   g->next = hash[pos];
   hash[pos] = g;
