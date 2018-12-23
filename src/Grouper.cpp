@@ -51,7 +51,7 @@ Grouper::~Grouper(){
 /* *************************************** */
 
 /*
- * use FNV hash for strings XXX WIP
+ * use FNV hash for strings
  */
 u_int32_t fnv_32a(char *str)
 {
