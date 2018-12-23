@@ -234,7 +234,7 @@ group * Grouper::newGroup(Host *h) {
 
 group * Grouper::addGroup(group *g)
 {
-  group *pos = NULL;
+  int32_t pos;
 
   if(g == NULL)
     return NULL;
@@ -246,12 +246,12 @@ group * Grouper::addGroup(group *g)
     case column_local_network_id:
     case column_pool_id:
     case column_mac:
-      pos = hash[int_hash(g->group_id.i)];
+      pos = int_hash(g->group_id.i);
       break;
 
     case column_country:
     case column_os:
-      pos = hash[fnv_32a(g->group_id.s)];
+      pos = fnv_32a(g->group_id.s);
       break;
 
     default:
@@ -261,11 +261,11 @@ group * Grouper::addGroup(group *g)
       break;
   }
 
-  g->next = pos;
-  pos = g;
+  g->next = hash[pos];
+  hash[pos] = g;
   numGroups++;
 
-  return pos;
+  return hash[pos];
 }
 
 /* *************************************** */
